@@ -1,10 +1,13 @@
 local api = vim.api
+local config = require('gitsigns.config').config
 
 --- @class Gitsigns.Hldef
 --- @field [integer] string
 --- @field desc string
 --- @field hidden? boolean
 --- @field fg_factor? number
+--- @field hidden boolean
+--- @field derives boolean
 
 local nvim10 = vim.fn.has('nvim-0.10') == 1
 
@@ -91,7 +94,7 @@ local function gen_hl(staged, kind, ty)
   return hl,
     {
       desc = ("Used for %s of '%s' %ssigns."):format(what, ty, sty),
-      fg_factor = staged and 0.5 or nil,
+      derives = staged,
       unpack(fallbacks),
     }
 end
@@ -260,11 +263,12 @@ local function derive(hl, hldef, is_bg_light)
   for _, d in ipairs(hldef) do
     if is_hl_set(d) then
       dprintf('Deriving %s from %s', hl, d)
-      if hldef.fg_factor then
+      if hldef.derives then
         local dh = get_hl(d)
+        local derivation_factor = config.staged_highlight_derivative_factor
         api.nvim_set_hl(0, hl, {
           default = true,
-          fg = cmix(dh.fg, hldef.fg_factor * (is_bg_light and 1 or -1)),
+          fg = cmix(dh.fg, derivation_factor * (is_bg_light and 1 or -1)),
           bg = dh.bg,
         })
       else
@@ -273,7 +277,7 @@ local function derive(hl, hldef, is_bg_light)
       return
     end
   end
-  if hldef[1] and not hldef.fg_factor then
+  if hldef[1] and not hldef.derives then
     -- No fallback found which is set. Just link to the first fallback
     -- if there are no modifiers
     dprintf('Deriving %s from %s', hl, hldef[1])

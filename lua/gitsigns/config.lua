@@ -81,6 +81,7 @@
 --- @field word_diff boolean
 --- @field trouble boolean
 --- @field gh boolean
+--- @field staged_highlight_derivative_factor number
 --- -- Undocumented
 --- @field _refresh_staged_on_update boolean
 --- @field _threaded_diff boolean
@@ -805,6 +806,16 @@ M.schema = {
     ]],
   },
 
+  staged_highlight_derivative_factor = {
+    type = 'number',
+    default = 0.5,
+    description = [[
+    This determines the factor used when deriving highlight for staged
+    from base colors (e.g: GitSignsStagedAdd derives from GitSignsAdd).
+    Between 0 (black) and 1 (same color). The closer to 0 the darker.
+    ]],
+  },
+
   _refresh_staged_on_update = {
     type = 'boolean',
     default = false,
@@ -859,6 +870,14 @@ function M.subscribe(k, cb)
   for _, v in ipairs(k) do
     subscribers[v] = subscribers[v] or {}
     table.insert(subscribers[v], cb)
+  end
+
+  local darken = M.config['staged_highlight_derivative_factor']
+  if darken and (darken < 0 or darken > 1) then
+    warn(
+      'gitsigns: Ignoring invalid configuration field '
+        + "'staged_highlight_derivative_factor' must be between 0 and 1"
+    )
   end
 end
 
