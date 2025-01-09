@@ -149,8 +149,8 @@ local function diffthis_rev(base, opts)
     mods = {
       vertical = opts.vertical,
       split = opts.split or 'aboveleft',
-      keepalt = true
-    }
+      keepalt = true,
+    },
   })
 
   api.nvim_set_current_win(cwin)
@@ -173,7 +173,7 @@ local function diffthis_rev(base, opts)
       if disable_cwin_diff then
         vim.wo[cwin].diff = false
       end
-    end
+    end,
   })
 end
 
@@ -232,7 +232,7 @@ local function should_reload(bufnr)
   end
   local response --- @type string?
   while not vim.tbl_contains({ 'O', 'L' }, response) do
-    response = async.wait(2, vim.ui.input, {
+    response = async.await(2, vim.ui.input, {
       prompt = 'Warning: The git index has changed and the buffer was changed as well. [O]K, (L)oad File:',
     })
   end
@@ -243,8 +243,8 @@ end
 --- @return boolean
 local function is_fugitive_diff_window(name)
   return vim.startswith(name, 'fugitive://')
-  and vim.fn.exists('*FugitiveParse')
-  and vim.fn.FugitiveParse(name)[1] ~= ':'
+    and vim.fn.exists('*FugitiveParse')
+    and vim.fn.FugitiveParse(name)[1] ~= ':'
 end
 
 -- This function needs to be throttled as there is a call to vim.ui.input
