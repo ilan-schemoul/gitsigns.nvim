@@ -232,6 +232,13 @@ local init = true
 --- @param cfg table|nil Configuration for Gitsigns.
 ---     See |gitsigns-usage| for more details.
 function M.setup(cfg)
+  if not cfg then
+    -- XXX: weird bug ! Lazy calls first without cfg (happens only with
+    -- gitsigns). Gitsigns then setup highlights, but without proper cfg
+    -- values. So highlights are wrong.
+    return
+  end
+
   if vim.fn.executable('git') == 0 then
     print('gitsigns: git not in path. Aborting setup')
     return
